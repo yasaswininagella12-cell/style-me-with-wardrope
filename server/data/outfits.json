@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "image": "https://picsum.photos/seed/stylemeo1/400/520",
+    "title": "Everyday",
+    "description": "Effortless, timeless, always on-point."
+  },
+  {
+    "id": 2,
+    "image": "https://picsum.photos/seed/stylemeo2/400/520",
+    "title": "Work",
+    "description": "Sharp enough for the corner office."
+  },
+  {
+    "id": 3,
+    "image": "https://picsum.photos/seed/stylemeo3/400/520",
+    "title": "Weekend",
+    "description": "Relaxed layers, zero effort."
+  },
+  {
+    "id": 4,
+    "image": "https://picsum.photos/seed/stylemeo4/400/520",
+    "title": "Party",
+    "description": "Turn heads without breaking a sweat."
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "icon": "🎨",
+    "title": "Decode your Style Formula",
+    "description": "Snap a simple selfie and let StyleMe reveal your color palette, body silhouette and signature style type — your unique Style Formula.",
+    "image": "https://picsum.photos/seed/styleme1/600/380"
+  },
+  {
+    "id": 2,
+    "icon": "🧺",
+    "title": "Scan & maximize your wardrobe",
+    "description": "Add the pieces you already own. Our AI pairs them into stylish, ready-to-wear outfits for every occasion — even the pieces you forgot about.",
+    "image": "https://picsum.photos/seed/styleme2/600/380"
+  },
+  {
+    "id": 3,
+    "icon": "🛍️",
+    "title": "Shop smarter, stress-free",
+    "description": "Take a photo in-store to instantly see if an item flatters you and how it works with your existing wardrobe. Say goodbye to regret purchases.",
+    "image": "https://picsum.photos/seed/styleme3/600/380"
+  }
+]
