@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tilt3D } from "@/components/ui/tilt-3d";
 import { optionLabel } from "@/lib/constants";
 import { deleteWardrobeItem } from "@/lib/actions";
 import type { WardrobeItem } from "@/generated/prisma/client";
@@ -50,15 +51,17 @@ export function WardrobeItemCard({
 
   return (
     <Card className="group overflow-hidden">
-      <div className="relative aspect-square overflow-hidden bg-muted">
-        <Image
-          src={item.imageUrl}
-          alt={item.name}
-          fill
-          sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute right-2 top-2">
+      <Tilt3D className="relative aspect-square overflow-hidden bg-muted [transform-style:preserve-3d]">
+        <div className="absolute inset-0 [transform:translateZ(26px)]">
+          <Image
+            src={item.imageUrl}
+            alt={item.name}
+            fill
+            sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+        <div className="absolute right-2 top-2 [transform:translateZ(46px)]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -85,7 +88,7 @@ export function WardrobeItemCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
+      </Tilt3D>
       <CardContent className="p-4">
         <h3 className="truncate font-heading text-base font-semibold">{item.name}</h3>
         <p className="mt-0.5 text-sm text-muted-foreground">

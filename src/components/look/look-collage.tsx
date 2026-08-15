@@ -5,6 +5,7 @@ import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import { Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tilt3D } from "@/components/ui/tilt-3d";
 import type { RecommendationItem, StylingResult } from "@/types";
 
 function withImages(...groups: RecommendationItem[][]): RecommendationItem[] {
@@ -103,67 +104,99 @@ export function LookCollage({
     }
   }
 
-  const tilt = ["-rotate-2", "rotate-1", "rotate-2", "-rotate-1", "rotate-1", "-rotate-2", "rotate-2", "-rotate-1"];
+  // Standing-photo 3D pose per tile index: a slight rotateY + rotateZ with a
+  // translateZ so tiles sit at different depths, like photos propped up on a shelf.
+  const PHOTO_3D = [
+    "rotateY(-10deg) rotateZ(-3deg) translateZ(10px)",
+    "rotateY(8deg) rotateZ(2deg) translateZ(32px)",
+    "rotateY(-7deg) rotateZ(4deg) translateZ(20px)",
+    "rotateY(10deg) rotateZ(-2deg) translateZ(44px)",
+    "rotateY(-9deg) rotateZ(2deg) translateZ(14px)",
+    "rotateY(7deg) rotateZ(-3deg) translateZ(36px)",
+    "rotateY(-8deg) rotateZ(1deg) translateZ(26px)",
+    "rotateY(11deg) rotateZ(-1deg) translateZ(18px)",
+  ];
+  const EXTRA_3D = [
+    "rotateY(-8deg) rotateZ(2deg) translateZ(8px)",
+    "rotateY(6deg) rotateZ(-2deg) translateZ(18px)",
+    "rotateY(-5deg) rotateZ(3deg) translateZ(12px)",
+    "rotateY(8deg) rotateZ(-1deg) translateZ(22px)",
+    "rotateY(-6deg) rotateZ(1deg) translateZ(10px)",
+    "rotateY(5deg) rotateZ(-3deg) translateZ(16px)",
+  ];
 
   return (
     <div className="flex flex-col items-start gap-3">
-      <div
-        ref={nodeRef}
-        className="w-full max-w-[520px] rounded-3xl bg-[#fdfbf7] p-6 shadow-sm ring-1 ring-border"
-      >
-        <div className="text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#b08d3e]">
-            Style Me With Wardrobe
-          </p>
-          <h2 className="mt-1 font-heading text-2xl font-bold text-[#2b2118]">
-            {name ?? "My Complete Look"}
-          </h2>
-          {occasion && (
-            <span className="mt-2 inline-block rounded-full bg-[#2b2118] px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-[#fdfbf7]">
-              {occasion}
-            </span>
-          )}
-        </div>
+      <Tilt3D className="group w-full max-w-[520px] rounded-3xl">
+        <div
+          ref={nodeRef}
+          className="w-full rounded-3xl bg-[#fdfbf7] p-6 shadow-sm ring-1 ring-border [perspective:1200px] [transform-style:preserve-3d]"
+        >
+          <div className="text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#b08d3e]">
+              Style Me With Wardrobe
+            </p>
+            <h2 className="mt-1 font-heading text-2xl font-bold text-[#2b2118]">
+              {name ?? "My Complete Look"}
+            </h2>
+            {occasion && (
+              <span className="mt-2 inline-block rounded-full bg-[#2b2118] px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-[#fdfbf7]">
+                {occasion}
+              </span>
+            )}
+          </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          {outfit.map((item, i) => (
-            <div
-              key={`${item.id}-${i}`}
-              className={`h-24 w-24 overflow-hidden rounded-2xl ring-1 ring-black/10 ${tilt[i % tilt.length]}`}
-            >
-              {item.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[#f1e7d3] text-[10px] font-medium text-[#8a7a5c]">
-                  {item.name}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {extras.length > 0 && (
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            {extras.map((item, i) => (
-              <div key={`${item.id}-${i}`} className="flex items-center gap-2">
-                {item.imageUrl && (
-                  <div className="h-12 w-12 overflow-hidden rounded-xl ring-1 ring-black/10">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 [transform-style:preserve-3d]">
+            {outfit.map((item, i) => (
+              <div
+                key={`${item.id}-${i}`}
+                className="relative [transform-style:preserve-3d]"
+                style={{ transform: PHOTO_3D[i % PHOTO_3D.length] }}
+              >
+                <div className="absolute inset-x-1 -bottom-2 h-3 rounded-[50%] bg-black/25 blur-[3px]" />
+                <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-white p-1 shadow-[0_18px_28px_-12px_rgba(43,33,24,0.5)]">
+                  {item.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={item.imageUrl}
                       alt={item.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full rounded-xl object-cover"
                     />
-                  </div>
-                )}
-                <span className="max-w-[80px] truncate text-[10px] font-medium text-[#6b5b3f]">
-                  {item.name}
-                </span>
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center rounded-xl bg-[#f1e7d3] text-[10px] font-medium text-[#8a7a5c]">
+                      {item.name}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        )}
+
+          {extras.length > 0 && (
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3 [transform-style:preserve-3d]">
+              {extras.map((item, i) => (
+                <div
+                  key={`${item.id}-${i}`}
+                  className="relative flex items-center gap-2 [transform-style:preserve-3d]"
+                  style={{ transform: EXTRA_3D[i % EXTRA_3D.length] }}
+                >
+                  {item.imageUrl && (
+                    <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white p-0.5 shadow-[0_10px_18px_-8px_rgba(43,33,24,0.45)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="h-full w-full rounded-[10px] object-cover"
+                      />
+                    </div>
+                  )}
+                  <span className="max-w-[80px] truncate text-[10px] font-medium text-[#6b5b3f]">
+                    {item.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
         <div className="mt-6 flex items-center justify-between border-t border-[#e8dcc2] pt-4">
           <div className="flex items-center gap-1.5">
@@ -180,7 +213,8 @@ export function LookCollage({
             Metal tone: <span className="text-[#2b2118]">{result.metalTone}</span>
           </p>
         </div>
-      </div>
+        </div>
+      </Tilt3D>
 
       <Button type="button" variant="outline" onClick={handleDownload} disabled={downloading}>
         {downloading ? (

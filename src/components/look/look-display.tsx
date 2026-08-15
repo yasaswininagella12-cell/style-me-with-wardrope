@@ -1,6 +1,7 @@
 import { Gem, Footprints, Handbag, Sparkles, Palette, Scissors, Brush, Wand2, UserRound } from "lucide-react";
 import type { RecommendationItem, StylingResult } from "@/types";
 import { LookCollage } from "@/components/look/look-collage";
+import { MannequinViewer } from "@/components/look/mannequin-viewer";
 import { TryOnPreview } from "@/components/look/try-on-preview";
 import { AiTryOn } from "@/components/look/ai-try-on";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,9 @@ export function LookDisplay({
           </Button>
         </div>
       )}
+
+      {/* 3D mannequin */}
+      <MannequinViewer items={result.outfit} name={name} />
 
       {/* Look image */}
       <LookCollage result={result} name={name} occasion={occasion} />
