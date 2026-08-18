@@ -12,9 +12,13 @@ export async function POST(request: Request) {
   }
 
   let outfitId: string;
+  let gender: string | null = null;
   try {
-    const body = (await request.json()) as { outfitId?: unknown };
+    const body = (await request.json()) as { outfitId?: unknown; gender?: unknown };
     outfitId = String(body?.outfitId ?? "");
+    if (body?.gender && typeof body.gender === "string" && body.gender !== "none") {
+      gender = body.gender;
+    }
   } catch {
     return NextResponse.json({ error: "Missing outfitId." }, { status: 400 });
   }
@@ -32,7 +36,7 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { bodyPhotoUrl: true },
+    select: { bodyPhotoUrl: true, gender: true },
   });
   if (!user?.bodyPhotoUrl) {
     return NextResponse.json(
@@ -40,6 +44,8 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+
+  const userGender = gender ?? user.gender;
 
   await prisma.outfit.update({
     where: { id: outfit.id },
@@ -53,6 +59,7 @@ export async function POST(request: Request) {
       bodyPhotoUrl: user.bodyPhotoUrl,
       garments: outfit.items.map((oi) => oi.wardrobeItem),
       origin,
+      gender: userGender,
     });
     await prisma.outfit.update({
       where: { id: outfit.id },

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FieldError } from "@/components/ui/field-error";
-import { STYLES, COLORS } from "@/lib/constants";
+import { STYLES, COLORS, GENDERS } from "@/lib/constants";
 import { updateProfile } from "@/lib/actions";
 import { BodyPhotoUploader } from "@/components/profile/body-photo-uploader";
 
@@ -17,12 +17,14 @@ export function ProfileForm({
   name,
   image,
   bodyPhotoUrl,
+  gender,
   preferredStyle,
   preferredColorPalette,
 }: {
   name?: string | null;
   image?: string | null;
   bodyPhotoUrl?: string | null;
+  gender?: string | null;
   preferredStyle?: string | null;
   preferredColorPalette?: string | null;
 }) {
@@ -30,6 +32,7 @@ export function ProfileForm({
   const [form, setForm] = useState({
     name: name ?? "",
     image: image ?? "",
+    gender: gender ?? "",
     preferredStyle: preferredStyle ?? "",
     preferredColorPalette: preferredColorPalette ?? "",
   });
@@ -44,6 +47,7 @@ export function ProfileForm({
     const result = await updateProfile({
       name: form.name,
       image: form.image,
+      gender: form.gender || null,
       preferredStyle: form.preferredStyle || null,
       preferredColorPalette: form.preferredColorPalette || null,
     });
@@ -100,6 +104,28 @@ export function ProfileForm({
             photo.
           </p>
           <BodyPhotoUploader value={bodyPhotoUrl} onSaved={() => router.refresh()} />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Gender</Label>
+          <Select
+            value={form.gender || "none"}
+            onValueChange={(v) =>
+              setForm((f) => ({ ...f, gender: v === "none" ? "" : v }))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Prefer not to say</SelectItem>
+              {GENDERS.map((g) => (
+                <SelectItem key={g.value} value={g.value}>
+                  {g.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

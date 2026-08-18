@@ -4,6 +4,7 @@ import type {
   ColorName,
   EarringType,
   FootwearType,
+  GenderType,
   JewelryCategory,
   MaterialType,
   NecklineType,
@@ -13,6 +14,12 @@ import type {
   SeasonType,
   StyleType,
 } from "@/types";
+
+export const GENDERS: { value: GenderType; label: string }[] = [
+  { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
+  { value: "non-binary", label: "Non-binary" },
+];
 
 export const CATEGORIES: { value: ClothingCategory; label: string }[] = [
   { value: "dress", label: "Dress" },

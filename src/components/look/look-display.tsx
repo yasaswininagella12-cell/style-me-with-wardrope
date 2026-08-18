@@ -1,8 +1,6 @@
 import { Gem, Footprints, Handbag, Sparkles, Palette, Scissors, Brush, Wand2, UserRound } from "lucide-react";
 import type { RecommendationItem, StylingResult } from "@/types";
 import { LookCollage } from "@/components/look/look-collage";
-import { MannequinViewer } from "@/components/look/mannequin-viewer";
-import { TryOnPreview } from "@/components/look/try-on-preview";
 import { AiTryOn } from "@/components/look/ai-try-on";
 import { Button } from "@/components/ui/button";
 
@@ -45,6 +43,7 @@ export function LookDisplay({
   bodyPhotoUrl,
   outfitId,
   aiTryOnUrl,
+  gender,
 }: {
   result: StylingResult;
   name?: string;
@@ -52,10 +51,11 @@ export function LookDisplay({
   bodyPhotoUrl?: string | null;
   outfitId?: string;
   aiTryOnUrl?: string | null;
+  gender?: string | null;
 }) {
   return (
     <div className="space-y-8">
-      {/* Try-on on your photo */}
+      {/* 2D outfit image on your photo */}
       {bodyPhotoUrl ? (
         <div className="space-y-8">
           {outfitId && (
@@ -64,27 +64,9 @@ export function LookDisplay({
               bodyPhotoUrl={bodyPhotoUrl}
               items={result.outfit}
               existingUrl={aiTryOnUrl}
+              gender={gender}
             />
           )}
-          <div>
-            <div className="mb-4 flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <UserRound className="size-4" aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="font-heading text-xl font-semibold">Worn on your photo</h2>
-                <p className="text-sm text-muted-foreground">
-                  Quick preview — your selected pieces overlaid on your full-body photo.
-                </p>
-              </div>
-            </div>
-            <TryOnPreview
-              bodyPhotoUrl={bodyPhotoUrl}
-              items={result.outfit}
-              name={name}
-              occasion={occasion}
-            />
-          </div>
         </div>
       ) : (
         <div className="flex items-center gap-4 rounded-2xl border border-dashed bg-card p-6">
@@ -105,9 +87,6 @@ export function LookDisplay({
           </Button>
         </div>
       )}
-
-      {/* 3D mannequin */}
-      <MannequinViewer items={result.outfit} name={name} />
 
       {/* Look image */}
       <LookCollage result={result} name={name} occasion={occasion} />

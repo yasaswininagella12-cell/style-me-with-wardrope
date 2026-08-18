@@ -2,6 +2,8 @@
 // Shared domain types & enums
 // =============================================================
 
+export type GenderType = "male" | "female" | "non-binary";
+
 export type ClothingCategory =
   | "dress"
   | "top"

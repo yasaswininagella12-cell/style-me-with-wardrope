@@ -326,6 +326,7 @@ export async function updateProfile(input: unknown): Promise<ActionResult> {
       name: parsed.data.name,
       image: parsed.data.image || null,
       bodyPhotoUrl: parsed.data.bodyPhotoUrl || null,
+      gender: parsed.data.gender || null,
       preferredStyle: parsed.data.preferredStyle || null,
       preferredColorPalette: parsed.data.preferredColorPalette || null,
     },

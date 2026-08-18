@@ -60,6 +60,7 @@ export const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(60).optional(),
   image: z.string().url("Enter a valid image URL").optional().or(z.literal("")),
   bodyPhotoUrl: z.string().optional().or(z.literal("")).or(z.null()),
+  gender: z.string().optional().nullable(),
   preferredStyle: z.string().optional().nullable(),
   preferredColorPalette: z.string().optional().nullable(),
 });

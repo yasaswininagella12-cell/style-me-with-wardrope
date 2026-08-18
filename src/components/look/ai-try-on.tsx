@@ -17,11 +17,13 @@ export function AiTryOn({
   bodyPhotoUrl,
   items,
   existingUrl,
+  gender,
 }: {
   outfitId: string;
   bodyPhotoUrl?: string | null;
   items: AiTryOnItem[];
   existingUrl?: string | null;
+  gender?: string | null;
 }) {
   const [status, setStatus] = useState<"idle" | "running" | "done">(
     existingUrl ? "done" : "idle",
@@ -39,7 +41,7 @@ export function AiTryOn({
       const res = await fetch("/api/vton", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ outfitId }),
+        body: JSON.stringify({ outfitId, gender }),
       });
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!res.ok || !data.url) {
@@ -62,9 +64,9 @@ export function AiTryOn({
           <Sparkles className="size-4" aria-hidden="true" />
         </span>
         <div>
-          <h2 className="font-heading text-xl font-semibold">AI photorealistic try-on</h2>
+          <h2 className="font-heading text-xl font-semibold">2D outfit preview</h2>
           <p className="text-sm text-muted-foreground">
-            An AI places this exact outfit on your uploaded photo — like a real fitting.
+            An AI generates a 2D image of this outfit on a {gender === "male" ? "male" : gender === "female" ? "female" : "gender-neutral"} model matching your selection.
           </p>
         </div>
       </div>
@@ -75,7 +77,7 @@ export function AiTryOn({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={url}
-              alt="AI try-on result"
+              alt="2D outfit preview"
               className="w-full rounded-2xl shadow-sm ring-1 ring-border"
             />
           </div>
@@ -91,7 +93,7 @@ export function AiTryOn({
               </a>
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">
-              AI results are photorealistic but may differ slightly from your real photo.
+              AI results are photorealistic but may differ slightly from reality.
             </p>
           </div>
         </div>
@@ -99,10 +101,11 @@ export function AiTryOn({
         <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed bg-background/60 px-6 py-14 text-center">
           <Loader2 className="size-8 animate-spin text-brand-gold" aria-hidden="true" />
           <p className="mt-4 font-heading text-lg font-semibold">
-            Dressing your outfit on your photo…
+            Generating your 2D outfit image…
           </p>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            This usually takes 15–60 seconds. The AI puts your selected pieces on your photo — keep
+            This usually takes 15–60 seconds. The AI creates a 2D image of your outfit on a
+            {gender === "male" ? " male" : gender === "female" ? " female" : ""} model — keep
             this tab open.
           </p>
         </div>
@@ -113,15 +116,14 @@ export function AiTryOn({
               <p className="font-medium">
                 {garmentCount > 0 ? (
                   <>
-                    Try on {garmentCount} piece{garmentCount === 1 ? "" : "s"} from this look.
+                    Generate a 2D image of {garmentCount} piece{garmentCount === 1 ? "" : "s"} from this look.
                   </>
                 ) : (
-                  "This look has no garment photos to try on yet."
+                  "This look has no garment photos to generate from yet."
                 )}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Uses your uploaded full-body photo and generates a realistic photo of you wearing
-                the outfit.
+                The AI creates a 2D image of the outfit on a model matching your selected gender.
               </p>
               {error && (
                 <div className="mt-2">
@@ -156,7 +158,7 @@ export function AiTryOn({
               className="shrink-0"
             >
               <Sparkles className="mr-2 size-4" aria-hidden="true" />
-              Generate AI try-on
+              Generate 2D preview
             </Button>
           </div>
         </div>

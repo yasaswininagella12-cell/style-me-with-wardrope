@@ -152,11 +152,13 @@ async function generateWithFashn({
   garments,
   origin,
   apiKey,
+  gender,
 }: {
   bodyPhotoUrl: string;
   garments: Array<{ name: string; category?: string | null; imageUrl?: string | null }>;
   origin: string;
   apiKey: string;
+  gender?: string | null;
 }): Promise<string> {
   const usable = garments.filter((garment) => garment.imageUrl).sort(
     (a, b) => chainRank(a.category) - chainRank(b.category),
@@ -187,11 +189,13 @@ async function generateWithGemini({
   garments,
   origin,
   apiKey,
+  gender,
 }: {
   bodyPhotoUrl: string;
   garments: Array<{ name: string; category?: string | null; imageUrl?: string | null }>;
   origin: string;
   apiKey: string;
+  gender?: string | null;
 }): Promise<string> {
   const usable = garments.filter((garment) => garment.imageUrl).sort(
     (a, b) => chainRank(a.category) - chainRank(b.category),
@@ -212,10 +216,17 @@ async function generateWithGemini({
     .map((g, i) => `- Image ${i + 2}: a ${g.category ?? "clothing"} item called "${g.name}"`)
     .join("\n");
 
+  const genderHint = gender === "male"
+    ? "The model should appear as a male person."
+    : gender === "female"
+      ? "The model should appear as a female person."
+      : "Keep the person's appearance as-is from the original photo.";
+
   const prompt = [
     "The FIRST image is a real photo of a person.",
     "The OTHER images are separate items of clothing they want to try on:",
     garmentList,
+    genderHint,
     "Edit ONLY the first photo so the person is wearing exactly these clothes, matching each item's design, colour, fabric and fit.",
     "Keep the person's face, hairstyle, skin, body, pose, lighting and background identical to the original photo.",
     "The clothes must look naturally worn and photorealistic, as if the person is really wearing them.",
@@ -272,6 +283,7 @@ export async function generateTryOn({
   bodyPhotoUrl,
   garments,
   origin,
+  gender,
 }: {
   bodyPhotoUrl: string;
   garments: Array<{
@@ -281,15 +293,16 @@ export async function generateTryOn({
     imageUrl?: string | null;
   }>;
   origin: string;
+  gender?: string | null;
 }): Promise<string> {
   const fashnKey = process.env.FASHN_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
 
   if (fashnKey) {
-    return generateWithFashn({ bodyPhotoUrl, garments, origin, apiKey: fashnKey });
+    return generateWithFashn({ bodyPhotoUrl, garments, origin, apiKey: fashnKey, gender });
   }
   if (geminiKey) {
-    return generateWithGemini({ bodyPhotoUrl, garments, origin, apiKey: geminiKey });
+    return generateWithGemini({ bodyPhotoUrl, garments, origin, apiKey: geminiKey, gender });
   }
 
   throw new VtonError(

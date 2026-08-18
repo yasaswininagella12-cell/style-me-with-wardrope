@@ -18,6 +18,7 @@ model User {
   emailVerified         DateTime?
   image                 String?
   bodyPhotoUrl          String?
+  gender                String?
   password              String?
   role                  String    @default("user")
   preferredStyle        String?

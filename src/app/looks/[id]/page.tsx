@@ -34,7 +34,7 @@ export default async function LookPage({
   if (!outfit) notFound();
 
   const [user, items] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId }, select: { bodyPhotoUrl: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { bodyPhotoUrl: true, gender: true } }),
     Promise.resolve(outfit.items.map((oi) => oi.wardrobeItem)),
   ]);
 
@@ -89,6 +89,7 @@ export default async function LookPage({
         bodyPhotoUrl={user?.bodyPhotoUrl}
         outfitId={outfit.id}
         aiTryOnUrl={outfit.aiTryOnUrl}
+        gender={user?.gender}
       />
     </div>
   );

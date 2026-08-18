@@ -26,6 +26,7 @@ export default async function ProfilePage() {
         name={user?.name}
         image={user?.image}
         bodyPhotoUrl={user?.bodyPhotoUrl}
+        gender={user?.gender}
         preferredStyle={user?.preferredStyle}
         preferredColorPalette={user?.preferredColorPalette}
       />
