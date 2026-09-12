@@ -233,3 +233,116 @@ export interface StylingInput {
 }
 
 export type FavoriteTargetType = "savedLook" | "trend" | "wardrobeItem";
+
+// =============================================================
+// Style Report / wardrobe analytics
+// =============================================================
+
+export interface AnalysisBucket {
+  label: string;
+  count: number;
+}
+
+export interface ColorBucket {
+  label: string;
+  hex: string;
+  count: number;
+}
+
+export interface CoverageCheck {
+  id: string;
+  label: string;
+  hint: string;
+  present: boolean;
+  count: number;
+}
+
+export interface StyleReport {
+  totalItems: number;
+  distinctColors: number;
+  totalCategories: number;
+  byCategory: AnalysisBucket[];
+  byColor: ColorBucket[];
+  byOccasion: AnalysisBucket[];
+  bySeason: AnalysisBucket[];
+  byStyle: AnalysisBucket[];
+  byMaterial: AnalysisBucket[];
+  coverage: CoverageCheck[];
+  strengths: string[];
+  gaps: string[];
+  mostVersatileColor: ColorBucket;
+  versatilityScore: number;
+  versatilityLabel: string;
+  summary: string;
+}
+
+// =============================================================
+// One piece, many looks (remix)
+// =============================================================
+
+export interface RemixComboItem {
+  id: string;
+  name: string;
+  category: string;
+  imageUrl: string;
+}
+
+export interface RemixCombo {
+  tab: string;
+  occasion: string;
+  style: string;
+  items: RemixComboItem[];
+  lookId: string;
+  look: StylingResult;
+}
+
+export type RemixMood = "everyday" | "work" | "weekend" | "night";
+
+export interface RemixPlan {
+  hero: RemixComboItem;
+  combos: RemixCombo[];
+}
+
+// =============================================================
+// Trip packing / capsule planner
+// =============================================================
+
+export interface TripPackingItem {
+  id: string;
+  name: string;
+  imageUrl: string;
+  category: string;
+}
+
+export interface TripChecklistGroup {
+  group: string;
+  note: string;
+  items: TripPackingItem[];
+}
+
+export interface TripDayPlan {
+  day: number;
+  name: string;
+  occasion: string;
+  itemIds: string[];
+}
+
+export interface TripSampleLook {
+  id: string;
+  name: string;
+  occasion: string;
+  lookUrl: string;
+  look: StylingResult;
+}
+
+export interface TripPlan {
+  destination: string;
+  days: number;
+  vibe: string;
+  season: string;
+  capsule: TripPackingItem[];
+  checklist: TripChecklistGroup[];
+  dayPlans: TripDayPlan[];
+  sampleLooks: TripSampleLook[];
+  tip: string;
+}

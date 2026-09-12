@@ -78,6 +78,18 @@ export const stylingInputSchema = z.object({
   neckline: z.string().optional().nullable(),
 });
 
+export const remixInputSchema = z.object({
+  heroId: z.string().min(1, "Choose a piece to style"),
+  mood: z.enum(["everyday", "work", "weekend", "night"]),
+});
+
+export const packingInputSchema = z.object({
+  destination: z.string().max(80, "Keep the destination short").optional().nullable(),
+  days: z.coerce.number().int().min(1, "Trips need at least 1 day").max(30, "Keep it under 30 days"),
+  vibe: z.enum(["beach", "city", "mountains", "desert", "festival", "formal"]),
+  season: z.string().default("auto"),
+});
+
 export const jewelryInputSchema = z.object({
   itemId: z.string().optional().nullable(),
   occasion: z.string().optional().nullable(),
