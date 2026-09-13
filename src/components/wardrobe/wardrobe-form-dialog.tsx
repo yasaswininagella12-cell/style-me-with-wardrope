@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -39,43 +39,35 @@ const emptyForm: FormState = {
   style: "",
 };
 
-export function WardrobeFormDialog({
-  open,
-  onOpenChange,
+function formFromItem(item?: WardrobeItem | null): FormState {
+  if (!item) return emptyForm;
+  return {
+    name: item.name,
+    imageUrl: item.imageUrl,
+    category: item.category,
+    color: item.color,
+    secondaryColor: item.secondaryColor ?? "",
+    pattern: item.pattern ?? "",
+    material: item.material ?? "",
+    occasion: item.occasion ?? "",
+    season: item.season ?? "",
+    style: item.style ?? "",
+  };
+}
+
+function WardrobeFormFields({
   item,
   onSaved,
+  onClose,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   item?: WardrobeItem | null;
   onSaved?: () => void;
+  onClose: () => void;
 }) {
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [form, setForm] = useState<FormState>(() => formFromItem(item));
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setErrors({});
-    setError(null);
-    setForm(
-      item
-        ? {
-            name: item.name,
-            imageUrl: item.imageUrl,
-            category: item.category,
-            color: item.color,
-            secondaryColor: item.secondaryColor ?? "",
-            pattern: item.pattern ?? "",
-            material: item.material ?? "",
-            occasion: item.occasion ?? "",
-            season: item.season ?? "",
-            style: item.style ?? "",
-          }
-        : emptyForm,
-    );
-  }, [open, item]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -97,25 +89,13 @@ export function WardrobeFormDialog({
     }
     setPending(false);
     toast.success(item ? "Item updated." : "Item added to your wardrobe.");
-    onOpenChange(false);
+    onClose();
     onSaved?.();
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="font-heading text-xl">
-            {item ? "Edit item" : "Add to wardrobe"}
-          </DialogTitle>
-          <DialogDescription>
-            {item
-              ? "Update the details of this clothing item."
-              : "Upload a photo and tell us a little about this piece."}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-2">
+    <>
+      <div className="space-y-4 py-2">
           {error && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
@@ -293,13 +273,48 @@ export function WardrobeFormDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
+          <Button variant="outline" onClick={onClose} disabled={pending}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={pending || !form.imageUrl}>
             {pending ? "Saving…" : item ? "Save changes" : "Add item"}
           </Button>
         </DialogFooter>
+    </>
+  );
+}
+
+export function WardrobeFormDialog({
+  open,
+  onOpenChange,
+  item,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item?: WardrobeItem | null;
+  onSaved?: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="font-heading text-xl">
+            {item ? "Edit item" : "Add to wardrobe"}
+          </DialogTitle>
+          <DialogDescription>
+            {item
+              ? "Update the details of this clothing item."
+              : "Upload a photo and tell us a little about this piece."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <WardrobeFormFields
+          key={item?.id ?? "new"}
+          item={item}
+          onSaved={onSaved}
+          onClose={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -11,6 +11,9 @@ import {
   CircleUserRound,
   Images,
   Compass,
+  PieChart,
+  Shuffle,
+  Backpack,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +62,27 @@ const features = [
     description:
       "Favorite the trends, items and looks that speak to you, and build a personalized style moodboard.",
     href: "/favorites",
+  },
+  {
+    icon: PieChart,
+    title: "Style Report",
+    description:
+      "See what your closet can really do — color families, coverage gaps and a live versatility score.",
+    href: "/report",
+  },
+  {
+    icon: Shuffle,
+    title: "Remix a Piece",
+    description:
+      "Pick one over-worn favorite and instantly get three complete looks built around it.",
+    href: "/remix",
+  },
+  {
+    icon: Backpack,
+    title: "Trip Packing",
+    description:
+      "Turn your wardrobe into a travel capsule — an auto-packing list and an outfit for every day.",
+    href: "/packing",
   },
 ];
 

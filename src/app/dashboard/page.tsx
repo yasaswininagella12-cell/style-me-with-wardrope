@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shirt, Bookmark, Heart, Wand2, Gem, TrendingUp, Plus, UserRound } from "lucide-react";
+import { Shirt, Bookmark, Heart, Wand2, Gem, TrendingUp, Plus, UserRound, PieChart, Shuffle, Backpack } from "lucide-react";
 import { optionLabel } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -162,6 +162,32 @@ export default async function DashboardPage() {
                 <Link href="/saved-looks">
                   <Bookmark className="mr-2 size-4" aria-hidden="true" />
                   Saved looks
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-heading text-lg">Made for you</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/report">
+                  <PieChart className="mr-2 size-4" aria-hidden="true" />
+                  Style report
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/remix">
+                  <Shuffle className="mr-2 size-4" aria-hidden="true" />
+                  Remix one piece
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/packing">
+                  <Backpack className="mr-2 size-4" aria-hidden="true" />
+                  Plan a trip
                 </Link>
               </Button>
             </CardContent>

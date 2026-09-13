@@ -5,16 +5,20 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { generateStyling } from "@/lib/recommendations";
+import { buildRemixPlan } from "@/lib/remix";
+import { buildTripPlan } from "@/lib/packing";
 import {
   favoriteSchema,
   jewelryInputSchema,
   outfitSchema,
+  packingInputSchema,
   profileSchema,
+  remixInputSchema,
   savedLookSchema,
   stylingInputSchema,
   wardrobeItemSchema,
 } from "@/lib/validations";
-import type { RecommendationItem, StylingResult } from "@/types";
+import type { RecommendationItem, RemixPlan, StylingResult, TripPlan } from "@/types";
 import type { Prisma } from "@/generated/prisma/client";
 
 export type ActionResult<T = undefined> = {
@@ -307,6 +311,58 @@ export async function toggleFavorite(input: unknown): Promise<ActionResult<{ isF
   revalidatePath("/saved-looks");
   revalidatePath("/dashboard");
   return { data: { isFavorite: true } };
+}
+
+// =============================================================
+// One piece, many looks (remix)
+// =============================================================
+
+export async function buildRemixes(input: unknown): Promise<ActionResult<RemixPlan>> {
+  const userId = await requireUserId();
+  const parsed = remixInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "Choose a piece to style first." };
+  }
+
+  try {
+    const plan = await buildRemixPlan({
+      userId,
+      heroId: parsed.data.heroId,
+      mood: parsed.data.mood,
+    });
+    revalidatePath("/remix");
+    revalidatePath("/dashboard");
+    return { data: plan };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Could not build the looks." };
+  }
+}
+
+// =============================================================
+// Trip packing / capsule planner
+// =============================================================
+
+export async function planPacking(input: unknown): Promise<ActionResult<TripPlan>> {
+  const userId = await requireUserId();
+  const parsed = packingInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "Please fix the highlighted fields." };
+  }
+
+  try {
+    const plan = await buildTripPlan({
+      userId,
+      destination: parsed.data.destination?.trim() || null,
+      days: parsed.data.days,
+      vibe: parsed.data.vibe as "beach" | "city" | "mountains" | "desert" | "festival" | "formal",
+      season: parsed.data.season || null,
+    });
+    revalidatePath("/packing");
+    revalidatePath("/dashboard");
+    return { data: plan };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Could not plan your trip." };
+  }
 }
 
 // =============================================================

@@ -2,6 +2,8 @@ import { Gem, Footprints, Handbag, Sparkles, Palette, Scissors, Brush, Wand2, Us
 import type { RecommendationItem, StylingResult } from "@/types";
 import { LookCollage } from "@/components/look/look-collage";
 import { AiTryOn } from "@/components/look/ai-try-on";
+import { TryOnPreview } from "@/components/look/try-on-preview";
+import { demoGenderLabel, demoModelImage } from "@/lib/demo-model";
 import { Button } from "@/components/ui/button";
 
 function RecommendationGroup({
@@ -69,22 +71,46 @@ export function LookDisplay({
           )}
         </div>
       ) : (
-        <div className="flex items-center gap-4 rounded-2xl border border-dashed bg-card p-6">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-            <UserRound className="size-5" aria-hidden="true" />
-          </span>
-          <div className="flex-1">
-            <p className="font-heading text-lg font-semibold">
-              See this look worn on your photo
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Upload a full top-to-bottom picture once, and every generated look will be shown
-              over it — like a virtual dressing room.
-            </p>
+        <div className="space-y-8">
+          {/* 2D demo preview on a model matching the selected gender */}
+          <div>
+            <div className="mb-4 flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-brand-gold/15 text-brand-gold">
+                <UserRound className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="font-heading text-xl font-semibold">Demo preview</h2>
+                <p className="text-sm text-muted-foreground">
+                  A 2D {demoGenderLabel(gender)} model wears this look. For a personal preview,
+                  upload your own photo.
+                </p>
+              </div>
+            </div>
+            <TryOnPreview
+              bodyPhotoUrl={demoModelImage(gender)}
+              items={result.outfit}
+              name={name}
+              occasion={occasion}
+            />
           </div>
-          <Button asChild>
-            <a href="/onboarding">Upload photo</a>
-          </Button>
+
+          <div className="flex items-center gap-4 rounded-2xl border border-dashed bg-card p-6">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+              <UserRound className="size-5" aria-hidden="true" />
+            </span>
+            <div className="flex-1">
+              <p className="font-heading text-lg font-semibold">
+                See this look worn on your photo
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Upload a full top-to-bottom picture once, and every generated look will be shown
+                over it — like a virtual dressing room.
+              </p>
+            </div>
+            <Button asChild>
+              <a href="/onboarding">Upload photo</a>
+            </Button>
+          </div>
         </div>
       )}
 

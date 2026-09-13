@@ -1,10 +1,62 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import { Download, Loader2, Shirt, SlidersHorizontal, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// ---------------------------------------------------------------
+// Small external store for the per-photo fit scale/shift so we can
+// persist to localStorage without calling setState in an effect.
+// ---------------------------------------------------------------
+type FitState = { scale: number; shift: number };
+const DEFAULT_FIT: FitState = { scale: 100, shift: 0 };
+const fitCache = new Map<string, FitState>();
+const fitSubscribers = new Map<string, Set<() => void>>();
+
+function getFit(key: string): FitState {
+  const cached = fitCache.get(key);
+  if (cached) return cached;
+  let state: FitState = DEFAULT_FIT;
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<FitState>;
+        if (typeof parsed.scale === "number" && typeof parsed.shift === "number") {
+          state = { scale: parsed.scale, shift: parsed.shift };
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  fitCache.set(key, state);
+  return state;
+}
+
+function subscribeFit(key: string, onChange: () => void): () => void {
+  let subs = fitSubscribers.get(key);
+  if (!subs) {
+    subs = new Set();
+    fitSubscribers.set(key, subs);
+  }
+  subs.add(onChange);
+  return () => {
+    subs.delete(onChange);
+  };
+}
+
+function setFit(key: string, value: FitState) {
+  fitCache.set(key, value);
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
+  fitSubscribers.get(key)?.forEach((cb) => cb());
+}
 
 type TryOnItem = {
   id: string;
@@ -42,10 +94,7 @@ function useCutout(url?: string | null): string | null {
   const [cutout, setCutout] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!url) {
-      setCutout(null);
-      return;
-    }
+    if (!url) return;
     let cancelled = false;
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -194,7 +243,7 @@ function useCutout(url?: string | null): string | null {
     };
   }, [url]);
 
-  return cutout;
+  return url ? cutout : null;
 }
 
 function FitControls({
@@ -310,32 +359,18 @@ export function TryOnPreview({
   const nodeRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const storageKey = useMemo(
-    () => `tryon-fit-${bodyPhotoUrl.split("/").pop() ?? "photo"}`,
-    [bodyPhotoUrl],
+  const storageKey = bodyPhotoUrl.startsWith("data:")
+    ? "tryon-fit-demo"
+    : `tryon-fit-${bodyPhotoUrl.split("/").pop() ?? "photo"}`;
+
+  const { scale, shift } = useSyncExternalStore(
+    (cb) => subscribeFit(storageKey, cb),
+    () => getFit(storageKey),
+    () => DEFAULT_FIT,
   );
-  const [scale, setScale] = useState(100);
-  const [shift, setShift] = useState(0);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const { scale: s, shift: sh } = JSON.parse(saved) as { scale: number; shift: number };
-        if (typeof s === "number") setScale(s);
-        if (typeof sh === "number") setShift(sh);
-      }
-    } catch {
-      // ignore
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify({ scale, shift }));
-    } catch {
-      // ignore
-    }
+    setFit(storageKey, { scale, shift });
   }, [storageKey, scale, shift]);
 
   const garments = items.filter((i) => i.imageUrl);
@@ -382,7 +417,13 @@ export function TryOnPreview({
           {layered.map((item) => {
             const zone = zoneFor(item.category);
             return (
-              <GarmentLayer key={item.id} item={item} zone={zone} scale={scale} shift={shift} />
+              <GarmentLayer
+                key={`${item.id}-${item.imageUrl ?? ""}`}
+                item={item}
+                zone={zone}
+                scale={scale}
+                shift={shift}
+              />
             );
           })}
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/60 to-transparent px-4 pb-3 pt-8">
@@ -425,12 +466,9 @@ export function TryOnPreview({
         <FitControls
           scale={scale}
           shift={shift}
-          onScale={setScale}
-          onShift={setShift}
-          onReset={() => {
-            setScale(100);
-            setShift(0);
-          }}
+          onScale={(v) => setFit(storageKey, { scale: v, shift })}
+          onShift={(v) => setFit(storageKey, { scale, shift: v })}
+          onReset={() => setFit(storageKey, { scale: 100, shift: 0 })}
         />
       )}
     </div>
