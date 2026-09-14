@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { SavedLookCard } from "@/components/saved-looks/saved-look-card";
+import { SavedLooksGallery } from "@/components/saved-looks/saved-looks-gallery";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -53,25 +53,21 @@ export default async function SavedLooksPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {savedLooks.map((look) => (
-            <SavedLookCard
-              key={look.id}
-              look={{
-                id: look.id,
-                name: look.name,
-                description: look.description,
-                outfitId: look.outfitId,
-                createdAt: look.createdAt,
-                outfit: {
-                  name: look.outfit.name,
-                  items: look.outfit.items,
-                },
-                isFavorite: favoriteIds.has(look.id),
-              }}
-            />
-          ))}
-        </div>
+        <SavedLooksGallery
+          looks={savedLooks.map((look) => ({
+            id: look.id,
+            name: look.name,
+            description: look.description,
+            outfitId: look.outfitId,
+            createdAt: look.createdAt,
+            outfit: {
+              name: look.outfit.name,
+              occasion: look.outfit.occasion,
+              items: look.outfit.items,
+            },
+            isFavorite: favoriteIds.has(look.id),
+          }))}
+        />
       )}
     </div>
   );

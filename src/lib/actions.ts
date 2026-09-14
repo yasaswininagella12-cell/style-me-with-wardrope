@@ -16,6 +16,7 @@ import {
   remixInputSchema,
   savedLookSchema,
   stylingInputSchema,
+  updateSavedLookSchema,
   wardrobeItemSchema,
 } from "@/lib/validations";
 import type { RecommendationItem, RemixPlan, StylingResult, TripPlan } from "@/types";
@@ -264,6 +265,68 @@ export async function deleteSavedLook(id: string): Promise<ActionResult> {
   revalidatePath("/saved-looks");
   revalidatePath("/dashboard");
   return {};
+}
+
+export async function updateSavedLook(id: string, input: unknown): Promise<ActionResult> {
+  const userId = await requireUserId();
+  const parsed = updateSavedLookSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "Please check the highlighted fields.", fieldErrors: toFieldErrors(parsed.error) };
+  }
+
+  const existing = await prisma.savedLook.findFirst({ where: { id, userId } });
+  if (!existing) {
+    return { error: "Look not found." };
+  }
+
+  await prisma.savedLook.update({
+    where: { id },
+    data: {
+      name: parsed.data.name,
+      description: parsed.data.description || null,
+    },
+  });
+
+  revalidatePath("/saved-looks");
+  revalidatePath("/favorites");
+  return {};
+}
+
+export async function cloneSavedLook(id: string): Promise<ActionResult> {
+  const userId = await requireUserId();
+  const saved = await prisma.savedLook.findFirst({
+    where: { id, userId },
+    include: {
+      outfit: {
+        include: { items: { select: { wardrobeItemId: true } } },
+      },
+    },
+  });
+  if (!saved) {
+    return { error: "Look not found." };
+  }
+
+  const outfit = await prisma.outfit.create({
+    data: {
+      userId,
+      name: `${saved.name} copy`,
+      occasion: saved.outfit.occasion,
+      style: saved.outfit.style,
+      lookData: (saved.outfit.lookData ?? saved.lookData ?? undefined) as
+        | Prisma.InputJsonValue
+        | undefined,
+    },
+  });
+
+  await prisma.outfitItem.createMany({
+    data: saved.outfit.items.map((oi) => ({
+      outfitId: outfit.id,
+      wardrobeItemId: oi.wardrobeItemId,
+    })),
+  });
+
+  revalidatePath("/saved-looks");
+  redirect(`/looks/${outfit.id}`);
 }
 
 // =============================================================

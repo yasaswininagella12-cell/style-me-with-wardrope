@@ -4,10 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Bookmark, Heart, Trash2, ArrowRight } from "lucide-react";
+import { Bookmark, Heart, Trash2, ArrowRight, Pencil, Copy, ImageDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +29,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { deleteSavedLook, toggleFavorite } from "@/lib/actions";
+import { deleteSavedLook, toggleFavorite, updateSavedLook, cloneSavedLook } from "@/lib/actions";
+import { lookCardImage } from "@/lib/look-card";
 
 export type SavedLookItem = {
   id: string;
@@ -28,6 +40,7 @@ export type SavedLookItem = {
   createdAt: Date;
   outfit: {
     name: string;
+    occasion?: string | null;
     items: { wardrobeItem: { id: string; name: string; imageUrl: string } }[];
   };
   isFavorite: boolean;
@@ -36,8 +49,13 @@ export type SavedLookItem = {
 export function SavedLookCard({ look }: { look: SavedLookItem }) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [favorite, setFavorite] = useState(look.isFavorite);
   const [pending, setPending] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [cloning, setCloning] = useState(false);
 
   async function handleFavorite() {
     setPending(true);
@@ -57,6 +75,62 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
     }
     toast.success("Look deleted.");
     router.refresh();
+  }
+
+  function openEdit() {
+    setEditName(look.name);
+    setEditDescription(look.description ?? "");
+    setEditOpen(true);
+  }
+
+  async function handleUpdate() {
+    setUpdating(true);
+    const result = await updateSavedLook(look.id, {
+      name: editName,
+      description: editDescription || null,
+    });
+    setUpdating(false);
+    if (result && "error" in result && result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setEditOpen(false);
+    toast.success("Look updated.");
+    router.refresh();
+  }
+
+  async function handleClone() {
+    setCloning(true);
+    const result = await cloneSavedLook(look.id);
+    if (result && "error" in result && result.error) {
+      setCloning(false);
+      toast.error(result.error);
+    }
+  }
+
+  function downloadCard() {
+    const blob = new Blob(
+      [
+        lookCardImage({
+          name: look.name,
+          description: look.description,
+          pieceCount: look.outfit.items.length,
+          occasion: look.outfit.occasion,
+          images: look.outfit.items.map((oi) => ({
+            name: oi.wardrobeItem.name,
+            imageUrl: oi.wardrobeItem.imageUrl,
+          })),
+        }),
+      ],
+      { type: "image/svg+xml" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "look-card.svg";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Look card downloaded.");
   }
 
   return (
@@ -116,6 +190,34 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
           <Button
             variant="ghost"
             size="icon"
+            onClick={openEdit}
+            aria-label="Edit look"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClone}
+            disabled={cloning}
+            aria-label="Clone look"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Copy className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={downloadCard}
+            aria-label="Download look card"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <ImageDown className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             className="text-destructive hover:text-destructive"
             onClick={() => setConfirmOpen(true)}
             aria-label="Delete look"
@@ -145,6 +247,46 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-xl">Edit look</DialogTitle>
+            <DialogDescription>
+              Rename or add a note to this saved look.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-look-name">Look name</Label>
+              <Input
+                id="edit-look-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="e.g. Date night in cream"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-look-desc">Description (optional)</Label>
+              <Textarea
+                id="edit-look-desc"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="What makes this look special?"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate} disabled={updating || !editName.trim()}>
+              {updating ? "Saving…" : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

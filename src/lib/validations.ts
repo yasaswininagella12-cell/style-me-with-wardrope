@@ -56,6 +56,11 @@ export const savedLookSchema = z.object({
   lookData: z.record(z.string(), z.unknown()).optional().nullable(),
 });
 
+export const updateSavedLookSchema = z.object({
+  name: z.string().min(1, "Look name is required").max(100),
+  description: z.string().max(500, "Description must be 500 characters or fewer").optional().nullable(),
+});
+
 export const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(60).optional(),
   image: z.string().url("Enter a valid image URL").optional().or(z.literal("")),
