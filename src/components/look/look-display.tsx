@@ -3,6 +3,7 @@ import type { RecommendationItem, StylingResult } from "@/types";
 import { LookCollage } from "@/components/look/look-collage";
 import { AiTryOn } from "@/components/look/ai-try-on";
 import { TryOnPreview } from "@/components/look/try-on-preview";
+import { ReferralCard } from "@/components/look/referral-card";
 import { demoGenderLabel, demoModelImage } from "@/lib/demo-model";
 import { Button } from "@/components/ui/button";
 
@@ -114,8 +115,11 @@ export function LookDisplay({
         </div>
       )}
 
-      {/* Look image */}
-      <LookCollage result={result} name={name} occasion={occasion} />
+      {/* Look image + referral card */}
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <LookCollage result={result} name={name} occasion={occasion} />
+        <ReferralCard outfitId={outfitId} />
+      </div>
 
       {/* Recommendations */}
       <div className="grid gap-6 md:grid-cols-2">

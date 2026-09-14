@@ -230,8 +230,8 @@ export async function saveLook(input: unknown): Promise<ActionResult<{ id: strin
     return { error: "Outfit not found." };
   }
 
-  const existing = await prisma.savedLook.findUnique({
-    where: { outfitId: outfit.id },
+  const existing = await prisma.savedLook.findFirst({
+    where: { outfitId: outfit.id, userId },
   });
   if (existing) {
     return { error: "This look is already saved." };
