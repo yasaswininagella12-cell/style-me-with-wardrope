@@ -9,6 +9,8 @@ if (!connectionString) {
 }
 
 const dbUrl = new URL(connectionString);
+const isLocal = ["localhost", "127.0.0.1", "::1"].includes(dbUrl.hostname);
+const sslMode = dbUrl.searchParams.get("sslmode");
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
     host: dbUrl.hostname,
@@ -16,7 +18,10 @@ const prisma = new PrismaClient({
     user: decodeURIComponent(dbUrl.username),
     password: decodeURIComponent(dbUrl.password),
     database: dbUrl.pathname.slice(1),
-    ssl: { rejectUnauthorized: false },
+    ssl:
+      sslMode && sslMode !== "disable" && !isLocal
+        ? { rejectUnauthorized: false }
+        : undefined,
   }),
 });
 

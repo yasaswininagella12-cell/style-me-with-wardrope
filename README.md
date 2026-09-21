@@ -59,22 +59,39 @@ Required for the app to run against a database:
 | `CLOUDINARY_API_KEY`  | Optional                                                |
 | `CLOUDINARY_API_SECRET`| Optional                                               |
 
-### 3. Create the schema and seed demo data
+### 3. Configure a local database
+
+The repo ships with an embedded, portable PostgreSQL runner (no install, no admin
+rights needed). Start it in its own terminal:
 
 ```bash
-npx prisma migrate dev
+npm install
+npm run db:start   # initialises .data/pg, starts Postgres on :5433, creates the "styleme" DB
+```
+
+`.env` already points `DATABASE_URL` at `127.0.0.1:5433/styleme`. Stop it anytime
+with `npm run db:stop`.
+
+### 4. Create the schema and seed demo data
+
+```bash
+npx prisma migrate deploy
 npx prisma db seed
 ```
 
 Demo accounts: `admin@example.com` / `admin123` and `user@example.com` / `user123`.
 
-### 4. Run the dev server
+### 5. Run the dev server
 
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+> If you'd rather use Supabase/Neon/etc., set `DATABASE_URL` in `.env` to your
+> connection string. Legacy Supabase URLs with `?sslmode=require` are handled
+> automatically (SSL is only enabled for non-local hosts).
 
 ## Scripts
 
@@ -84,9 +101,11 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run build`         | Production build                         |
 | `npm run start`         | Serve the production build               |
 | `npm run lint`          | Lint                                     |
+| `npm run db:start`      | Start the embedded Postgres server       |
+| `npm run db:stop`       | Stop the embedded Postgres server        |
 | `npx tsc --noEmit`      | Typecheck                                |
 | `npx prisma generate`   | Regenerate the Prisma client             |
-| `npx prisma migrate dev`| Apply schema migrations                  |
+| `npx prisma migrate deploy`| Apply schema migrations               |
 | `npx prisma db seed`    | Seed demo data (`tsx prisma/seed.ts`)    |
 
 ## Project structure

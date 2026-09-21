@@ -7,12 +7,18 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function parseConnection(connectionString: string) {
   const url = new URL(connectionString);
+  const sslMode = url.searchParams.get("sslmode");
+  const isLocal = ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
   return {
     host: url.hostname,
     port: Number(url.port || 5432),
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     database: url.pathname.slice(1),
+    ssl:
+      sslMode && sslMode !== "disable" && !isLocal
+        ? { rejectUnauthorized: false }
+        : undefined,
   };
 }
 
@@ -23,7 +29,6 @@ function createPrismaClient() {
   }
   const adapter = new PrismaPg({
     ...parseConnection(connectionString),
-    ssl: { rejectUnauthorized: false },
   });
   return new PrismaClient({ adapter });
 }

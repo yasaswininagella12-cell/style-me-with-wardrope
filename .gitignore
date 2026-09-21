@@ -48,3 +48,6 @@ opencode.json
 
 # local dev uploads
 /public/uploads/
+
+# embedded postgres data
+/.data/
