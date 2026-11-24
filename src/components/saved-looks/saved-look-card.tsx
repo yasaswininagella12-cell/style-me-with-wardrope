@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Bookmark, Heart, Trash2, ArrowRight, Pencil, Copy, ImageDown } from "lucide-react";
+import { Bookmark, Globe, Heart, Lock, Trash2, ArrowRight, Pencil, Copy, ImageDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { deleteSavedLook, toggleFavorite, updateSavedLook, cloneSavedLook } from "@/lib/actions";
+import { toggleLookPublic } from "@/lib/feature-actions";
 import { lookCardImage } from "@/lib/look-card";
 
 export type SavedLookItem = {
@@ -44,6 +45,7 @@ export type SavedLookItem = {
     items: { wardrobeItem: { id: string; name: string; imageUrl: string } }[];
   };
   isFavorite: boolean;
+  isPublic: boolean;
 };
 
 export function SavedLookCard({ look }: { look: SavedLookItem }) {
@@ -53,6 +55,8 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [favorite, setFavorite] = useState(look.isFavorite);
+  const [isPublic, setIsPublic] = useState(look.isPublic);
+  const [sharing, setSharing] = useState(false);
   const [pending, setPending] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [cloning, setCloning] = useState(false);
@@ -108,6 +112,19 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
     }
   }
 
+  async function handleShare() {
+    setSharing(true);
+    const result = await toggleLookPublic(look.id);
+    setSharing(false);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setIsPublic(result.data?.isPublic ?? !isPublic);
+    toast.success(result.data?.isPublic ? "Look shared to the community." : "Look is private again.");
+    router.refresh();
+  }
+
   function downloadCard() {
     const blob = new Blob(
       [
@@ -157,6 +174,18 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
         )}
         <button
           type="button"
+          onClick={handleShare}
+          disabled={sharing}
+          aria-label={isPublic ? "Make look private" : "Share look to community"}
+          title={isPublic ? "Shared to Style Feed" : "Share to Style Feed"}
+          className={`absolute left-3 top-3 flex size-9 items-center justify-center rounded-full border bg-background/90 shadow-sm backdrop-blur transition-colors ${
+            isPublic ? "text-brand-gold" : "text-muted-foreground hover:text-brand-gold"
+          }`}
+        >
+          {isPublic ? <Globe className="size-4" /> : <Lock className="size-4" />}
+        </button>
+        <button
+          type="button"
           onClick={handleFavorite}
           disabled={pending}
           aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
@@ -176,6 +205,15 @@ export function SavedLookCard({ look }: { look: SavedLookItem }) {
           <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
             {look.description}
           </p>
+        )}
+        {isPublic && (
+          <Link
+            href={`/feed/${look.id}`}
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand-gold hover:underline"
+          >
+            <Globe className="size-3" aria-hidden="true" />
+            Shared to Style Feed
+          </Link>
         )}
         <p className="mt-2 text-sm text-muted-foreground">
           {look.outfit.items.length} {look.outfit.items.length === 1 ? "piece" : "pieces"}

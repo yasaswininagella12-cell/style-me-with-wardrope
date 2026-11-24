@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { CalendarDays, Footprints, Globe, ShoppingBag, Sparkles } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -9,6 +9,13 @@ const navLinks = [
   { href: "/trends", label: "Trends" },
   { href: "/saved-looks", label: "Saved Looks" },
   { href: "/how-it-works", label: "How It Works" },
+];
+
+const featureLinks = [
+  { href: "/calendar", label: "Outfit Calendar", icon: CalendarDays },
+  { href: "/wear", label: "Wear & Care", icon: Footprints },
+  { href: "/wishlist", label: "Wishlist & Budget", icon: ShoppingBag },
+  { href: "/feed", label: "Style Feed", icon: Globe },
 ];
 
 export function SiteLogo({ className = "" }: { className?: string }) {
@@ -25,4 +32,4 @@ export function SiteLogo({ className = "" }: { className?: string }) {
   );
 }
 
-export { navLinks };
+export { navLinks, featureLinks };

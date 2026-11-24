@@ -26,12 +26,21 @@ model User {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  accounts   Account[]
-  sessions   Session[]
-  wardrobe   WardrobeItem[]
-  outfits    Outfit[]
-  savedLooks SavedLook[]
-  favorites  Favorite[]
+  accounts     Account[]
+  sessions     Session[]
+  wardrobe     WardrobeItem[]
+  outfits      Outfit[]
+  savedLooks   SavedLook[]
+  favorites    Favorite[]
+  plans        OutfitPlan[]
+  wearLogs     WearLog[]
+  careLogs     CareLog[]
+  wishlist     WishlistItem[]
+  budget       Budget?
+  following    Follow[]       @relation("Follower")
+  followers    Follow[]       @relation("Following")
+  lookLikes    LookLike[]
+  lookComments LookComment[]
 }
 
 model Account {
@@ -75,24 +84,29 @@ model VerificationToken {
 // =============================================================
 
 model WardrobeItem {
-  id             String   @id @default(cuid())
-  userId         String
-  name           String
-  imageUrl       String
-  category       String
-  color          String
-  secondaryColor String?
-  pattern        String?
-  material       String?
-  occasion       String?
-  season         String?
-  style          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String   @id @default(cuid())
+  userId           String
+  name             String
+  imageUrl         String
+  category         String
+  color            String
+  secondaryColor   String?
+  pattern          String?
+  material         String?
+  occasion         String?
+  season           String?
+  style            String?
+  purchasePrice    Float?
+  careInstructions String?
+  careIntervalDays Int      @default(30)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   outfitItems OutfitItem[]
   favorites   Favorite[]
+  wearLogs    WearLog[]
+  careLogs    CareLog[]
 
   @@index([userId])
   @@index([category])
@@ -101,26 +115,27 @@ model WardrobeItem {
 }
 
 model Outfit {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  occasion  String?
-  style     String?
-  lookData     Json?
-  aiTryOnUrl   String?
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  occasion      String?
+  style         String?
+  lookData      Json?
+  aiTryOnUrl    String?
   aiTryOnStatus String   @default("idle")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     OutfitItem[]
   savedLook SavedLook?
+  plans     OutfitPlan[]
 
   @@index([userId])
 }
 
 model OutfitItem {
-  id             String  @id @default(cuid())
+  id             String @id @default(cuid())
   outfitId       String
   wardrobeItemId String
 
@@ -137,12 +152,15 @@ model SavedLook {
   name        String
   description String?
   lookData    Json?
+  isPublic    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  outfit    Outfit     @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfit    Outfit        @relation(fields: [outfitId], references: [id], onDelete: Cascade)
   favorites Favorite[]
+  likes     LookLike[]
+  comments  LookComment[]
 
   @@index([userId])
 }
@@ -262,4 +280,138 @@ model ColorMatch {
   createdAt  DateTime @default(now())
 
   @@index([baseColor])
+}
+
+// =============================================================
+// Outfit calendar
+// =============================================================
+
+model OutfitPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  outfitId  String
+  date      String
+  note      String?
+  isWorn    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfit Outfit @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, outfitId, date])
+  @@index([userId, date])
+}
+
+// =============================================================
+// Wear tracking & garment care
+// =============================================================
+
+model WearLog {
+  id             String   @id @default(cuid())
+  userId         String
+  wardrobeItemId String
+  wornAt         DateTime @default(now())
+  source         String   @default("manual")
+  note           String?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wardrobeItem WardrobeItem @relation(fields: [wardrobeItemId], references: [id], onDelete: Cascade)
+
+  @@index([userId, wornAt])
+  @@index([wardrobeItemId])
+}
+
+model CareLog {
+  id             String    @id @default(cuid())
+  userId         String
+  wardrobeItemId String
+  careType       String
+  caredAt        DateTime  @default(now())
+  nextDueAt      DateTime?
+  note           String?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wardrobeItem WardrobeItem @relation(fields: [wardrobeItemId], references: [id], onDelete: Cascade)
+
+  @@index([userId, caredAt])
+  @@index([wardrobeItemId])
+}
+
+// =============================================================
+// Wishlist & budget
+// =============================================================
+
+model WishlistItem {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String
+  category       String?
+  estimatedPrice Float?
+  priority       String    @default("nice-to-have")
+  status         String    @default("planned")
+  link           String?
+  imageUrl       String?
+  note           String?
+  purchasedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Budget {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  monthlyLimit Float    @default(0)
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// =============================================================
+// Social look feed
+// =============================================================
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
+model LookLike {
+  id          String   @id @default(cuid())
+  userId      String
+  savedLookId String
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedLook SavedLook @relation(fields: [savedLookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, savedLookId])
+  @@index([savedLookId])
+}
+
+model LookComment {
+  id          String   @id @default(cuid())
+  userId      String
+  savedLookId String
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedLook SavedLook @relation(fields: [savedLookId], references: [id], onDelete: Cascade)
+
+  @@index([savedLookId])
+  @@index([userId])
 }

@@ -14,6 +14,10 @@ import {
   PieChart,
   Shuffle,
   Backpack,
+  CalendarDays,
+  Footprints,
+  Globe,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -83,6 +87,34 @@ const features = [
     description:
       "Turn your wardrobe into a travel capsule — an auto-packing list and an outfit for every day.",
     href: "/packing",
+  },
+  {
+    icon: CalendarDays,
+    title: "Outfit Calendar",
+    description:
+      "Plan what you will wear day by day, add notes, and mark an outfit as worn when the day arrives.",
+    href: "/calendar",
+  },
+  {
+    icon: Footprints,
+    title: "Wear & Care",
+    description:
+      "Track wears, care routines and cost per wear so every piece in your closet earns its place.",
+    href: "/wear",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Wishlist & Budget",
+    description:
+      "Turn wardrobe gaps into an intentional shopping list and keep monthly spending under control.",
+    href: "/wishlist",
+  },
+  {
+    icon: Globe,
+    title: "Style Feed",
+    description:
+      "Share your favorite looks, follow other stylists, and find fresh outfit ideas from the community.",
+    href: "/feed",
   },
 ];
 

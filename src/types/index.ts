@@ -346,3 +346,19 @@ export interface TripPlan {
   sampleLooks: TripSampleLook[];
   tip: string;
 }
+
+// =============================================================
+// Wear care, wishlist & social feed
+// =============================================================
+
+export type CareType = "wash" | "dry-clean" | "iron" | "repair" | "other";
+export type WishlistPriority = "essential" | "nice-to-have" | "dream";
+export type WishlistStatus = "planned" | "purchased";
+
+export interface WishlistSuggestion {
+  id: string;
+  label: string;
+  reason: string;
+  category: string;
+  priority: WishlistPriority;
+}

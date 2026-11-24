@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shirt, Bookmark, Heart, Wand2, Gem, TrendingUp, Plus, UserRound, PieChart, Shuffle, Backpack } from "lucide-react";
+import { Shirt, Bookmark, Heart, Wand2, Gem, TrendingUp, Plus, UserRound, PieChart, Shuffle, Backpack, CalendarDays, Footprints, Globe, ShoppingBag } from "lucide-react";
 import { optionLabel } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -23,6 +23,10 @@ export default async function DashboardPage() {
     savedLooksCount,
     outfitCount,
     favoriteCount,
+    plannedOutfitCount,
+    wearLogCount,
+    wishlistCount,
+    sharedLookCount,
     recentItems,
   ] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
@@ -30,6 +34,10 @@ export default async function DashboardPage() {
     prisma.savedLook.count({ where: { userId } }),
     prisma.outfit.count({ where: { userId } }),
     prisma.favorite.count({ where: { userId } }),
+    prisma.outfitPlan.count({ where: { userId } }),
+    prisma.wearLog.count({ where: { userId } }),
+    prisma.wishlistItem.count({ where: { userId } }),
+    prisma.savedLook.count({ where: { userId, isPublic: true } }),
     prisma.wardrobeItem.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 6 }),
   ]);
 
@@ -68,6 +76,29 @@ export default async function DashboardPage() {
                 <div>
                   <p className="font-heading text-2xl font-bold">{stat.value}</p>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Outfits planned", value: plannedOutfitCount, icon: CalendarDays, href: "/calendar" },
+          { label: "Wears logged", value: wearLogCount, icon: Footprints, href: "/wear" },
+          { label: "Wishlist pieces", value: wishlistCount, icon: ShoppingBag, href: "/wishlist" },
+          { label: "Looks shared", value: sharedLookCount, icon: Globe, href: "/feed" },
+        ].map((item) => (
+          <Link key={item.label} href={item.href} className="group">
+            <Card className="h-full transition-shadow group-hover:shadow-md">
+              <CardContent className="flex items-center gap-4 p-5">
+                <span className="flex size-11 items-center justify-center rounded-xl bg-brand-gold/15 text-brand-gold">
+                  <item.icon className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-heading text-2xl font-bold">{item.value}</p>
+                  <p className="text-sm text-muted-foreground">{item.label}</p>
                 </div>
               </CardContent>
             </Card>

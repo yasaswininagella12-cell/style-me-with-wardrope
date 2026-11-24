@@ -25,6 +25,20 @@ const prisma = new PrismaClient({
   }),
 });
 
+function daysFromNow(offset: number) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + offset);
+  return date;
+}
+
+function dateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 async function main() {
   console.log("Seeding demo data…");
 
@@ -60,6 +74,366 @@ async function main() {
   });
 
   console.log(`Users ready: admin@example.com / admin123, user@example.com / user123`);
+
+  const demoIds = [admin.id, demoUser.id];
+
+  await prisma.lookComment.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.lookLike.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.savedLook.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.outfitPlan.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.wearLog.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.careLog.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.outfit.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.wishlistItem.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.budget.deleteMany({ where: { userId: { in: demoIds } } });
+  await prisma.follow.deleteMany({
+    where: {
+      OR: [
+        { followerId: { in: demoIds } },
+        { followingId: { in: demoIds } },
+      ],
+    },
+  });
+  await prisma.wardrobeItem.deleteMany({ where: { userId: { in: demoIds } } });
+
+  const wardrobeSeed = [
+    {
+      key: "demoBlouse",
+      userId: demoUser.id,
+      name: "Ivory silk blouse",
+      imageUrl: "/globe.svg",
+      category: "top",
+      color: "white",
+      secondaryColor: null,
+      pattern: "solid",
+      material: "silk",
+      occasion: "work",
+      season: "all-season",
+      style: "minimal",
+      purchasePrice: 78,
+      careInstructions: "Dry clean only",
+      careIntervalDays: 30,
+    },
+    {
+      key: "demoTrousers",
+      userId: demoUser.id,
+      name: "Tailored black trousers",
+      imageUrl: "/window.svg",
+      category: "pants",
+      color: "black",
+      secondaryColor: null,
+      pattern: "solid",
+      material: "wool",
+      occasion: "work",
+      season: "all-season",
+      style: "elegant",
+      purchasePrice: 120,
+      careInstructions: "Machine wash cold, hang dry",
+      careIntervalDays: 45,
+    },
+    {
+      key: "demoCoat",
+      userId: demoUser.id,
+      name: "Camel wool coat",
+      imageUrl: "/file.svg",
+      category: "jacket",
+      color: "beige",
+      secondaryColor: null,
+      pattern: "solid",
+      material: "wool",
+      occasion: "work",
+      season: "winter",
+      style: "classic",
+      purchasePrice: 240,
+      careInstructions: "Dry clean at season change",
+      careIntervalDays: 60,
+    },
+    {
+      key: "demoTee",
+      userId: demoUser.id,
+      name: "Blue striped tee",
+      imageUrl: "/next.svg",
+      category: "tshirt",
+      color: "light-blue",
+      secondaryColor: "white",
+      pattern: "stripes",
+      material: "cotton",
+      occasion: "casual",
+      season: "summer",
+      style: "casual",
+      purchasePrice: 34,
+      careInstructions: "Machine wash cold",
+      careIntervalDays: 20,
+    },
+    {
+      key: "adminBlazer",
+      userId: admin.id,
+      name: "Navy tailored blazer",
+      imageUrl: "/vercel.svg",
+      category: "blazer",
+      color: "navy",
+      secondaryColor: null,
+      pattern: "solid",
+      material: "wool",
+      occasion: "work",
+      season: "all-season",
+      style: "elegant",
+      purchasePrice: 180,
+      careInstructions: "Dry clean only",
+      careIntervalDays: 45,
+    },
+    {
+      key: "adminSkirt",
+      userId: admin.id,
+      name: "Pleated midi skirt",
+      imageUrl: "/globe.svg",
+      category: "skirt",
+      color: "navy",
+      secondaryColor: null,
+      pattern: "solid",
+      material: "polyester",
+      occasion: "evening",
+      season: "all-season",
+      style: "chic",
+      purchasePrice: 95,
+      careInstructions: "Hand wash cold",
+      careIntervalDays: 30,
+    },
+  ];
+
+  const itemIds: Record<string, string> = {};
+  for (const item of wardrobeSeed) {
+    const created = await prisma.wardrobeItem.create({
+      data: {
+        userId: item.userId,
+        name: item.name,
+        imageUrl: item.imageUrl,
+        category: item.category,
+        color: item.color,
+        secondaryColor: item.secondaryColor,
+        pattern: item.pattern,
+        material: item.material,
+        occasion: item.occasion,
+        season: item.season,
+        style: item.style,
+        purchasePrice: item.purchasePrice,
+        careInstructions: item.careInstructions,
+        careIntervalDays: item.careIntervalDays,
+      },
+    });
+    itemIds[item.key] = created.id;
+  }
+
+  const demoWorkOutfit = await prisma.outfit.create({
+    data: {
+      userId: demoUser.id,
+      name: "Everyday smart casual",
+      occasion: "work",
+      style: "minimal",
+      items: {
+        create: [
+          { wardrobeItemId: itemIds.demoBlouse },
+          { wardrobeItemId: itemIds.demoTrousers },
+          { wardrobeItemId: itemIds.demoCoat },
+        ],
+      },
+    },
+  });
+
+  const demoWeekendOutfit = await prisma.outfit.create({
+    data: {
+      userId: demoUser.id,
+      name: "Weekend coffee run",
+      occasion: "casual",
+      style: "casual",
+      items: {
+        create: [
+          { wardrobeItemId: itemIds.demoTee },
+          { wardrobeItemId: itemIds.demoTrousers },
+        ],
+      },
+    },
+  });
+
+  const adminOutfit = await prisma.outfit.create({
+    data: {
+      userId: admin.id,
+      name: "Midnight office edit",
+      occasion: "work",
+      style: "elegant",
+      items: {
+        create: [
+          { wardrobeItemId: itemIds.adminBlazer },
+          { wardrobeItemId: itemIds.adminSkirt },
+        ],
+      },
+    },
+  });
+
+  const demoPublicLook = await prisma.savedLook.create({
+    data: {
+      userId: demoUser.id,
+      outfitId: demoWorkOutfit.id,
+      name: "Neutrals for the office",
+      description: "A quiet-luxury work look built around soft neutrals and sharp tailoring.",
+      isPublic: true,
+    },
+  });
+
+  await prisma.savedLook.create({
+    data: {
+      userId: demoUser.id,
+      outfitId: demoWeekendOutfit.id,
+      name: "Striped and relaxed",
+      description: "A casual weekend look I am keeping private for now.",
+      isPublic: false,
+    },
+  });
+
+  const adminPublicLook = await prisma.savedLook.create({
+    data: {
+      userId: admin.id,
+      outfitId: adminOutfit.id,
+      name: "Midnight tailoring",
+      description: "Navy on navy with a pleated skirt for a polished evening meeting.",
+      isPublic: true,
+    },
+  });
+
+  await prisma.wearLog.createMany({
+    data: [
+      { userId: demoUser.id, wardrobeItemId: itemIds.demoBlouse, wornAt: daysFromNow(-2) },
+      { userId: demoUser.id, wardrobeItemId: itemIds.demoTrousers, wornAt: daysFromNow(-2) },
+      { userId: demoUser.id, wardrobeItemId: itemIds.demoBlouse, wornAt: daysFromNow(-9) },
+      { userId: demoUser.id, wardrobeItemId: itemIds.demoCoat, wornAt: daysFromNow(-12) },
+      { userId: demoUser.id, wardrobeItemId: itemIds.demoTee, wornAt: daysFromNow(-4) },
+      { userId: admin.id, wardrobeItemId: itemIds.adminBlazer, wornAt: daysFromNow(-3) },
+      { userId: admin.id, wardrobeItemId: itemIds.adminSkirt, wornAt: daysFromNow(-3) },
+    ],
+  });
+
+  await prisma.careLog.createMany({
+    data: [
+      {
+        userId: demoUser.id,
+        wardrobeItemId: itemIds.demoCoat,
+        careType: "dry-clean",
+        caredAt: daysFromNow(-45),
+        nextDueAt: daysFromNow(-2),
+        note: "Last cleaned before winter",
+      },
+      {
+        userId: demoUser.id,
+        wardrobeItemId: itemIds.demoBlouse,
+        careType: "wash",
+        caredAt: daysFromNow(-5),
+        nextDueAt: daysFromNow(20),
+        note: "Cold wash, air dried",
+      },
+      {
+        userId: admin.id,
+        wardrobeItemId: itemIds.adminBlazer,
+        careType: "dry-clean",
+        caredAt: daysFromNow(-10),
+        nextDueAt: daysFromNow(25),
+      },
+    ],
+  });
+
+  await prisma.outfitPlan.createMany({
+    data: [
+      {
+        userId: demoUser.id,
+        outfitId: demoWorkOutfit.id,
+        date: dateKey(daysFromNow(2)),
+        note: "Team presentation",
+      },
+      {
+        userId: demoUser.id,
+        outfitId: demoWeekendOutfit.id,
+        date: dateKey(daysFromNow(5)),
+      },
+      {
+        userId: admin.id,
+        outfitId: adminOutfit.id,
+        date: dateKey(daysFromNow(1)),
+        note: "Client dinner",
+      },
+    ],
+  });
+
+  await prisma.wishlistItem.createMany({
+    data: [
+      {
+        userId: demoUser.id,
+        name: "Tailored black blazer",
+        category: "blazer",
+        estimatedPrice: 180,
+        priority: "essential",
+        note: "The missing layer for work outfits.",
+      },
+      {
+        userId: demoUser.id,
+        name: "Cashmere turtleneck",
+        category: "top",
+        estimatedPrice: 110,
+        priority: "nice-to-have",
+        note: "Soft layer for colder offices.",
+      },
+      {
+        userId: demoUser.id,
+        name: "Leather loafers",
+        category: "other",
+        estimatedPrice: 140,
+        priority: "dream",
+        status: "purchased",
+        purchasedAt: new Date(),
+      },
+      {
+        userId: admin.id,
+        name: "Emerald satin dress",
+        category: "dress",
+        estimatedPrice: 160,
+        priority: "dream",
+      },
+    ],
+  });
+
+  await prisma.budget.upsert({
+    where: { userId: demoUser.id },
+    update: { monthlyLimit: 300 },
+    create: { userId: demoUser.id, monthlyLimit: 300 },
+  });
+
+  await prisma.budget.upsert({
+    where: { userId: admin.id },
+    update: { monthlyLimit: 200 },
+    create: { userId: admin.id, monthlyLimit: 200 },
+  });
+
+  await prisma.follow.createMany({
+    data: [
+      { followerId: demoUser.id, followingId: admin.id },
+      { followerId: admin.id, followingId: demoUser.id },
+    ],
+  });
+
+  await prisma.lookLike.createMany({
+    data: [
+      { userId: admin.id, savedLookId: demoPublicLook.id },
+      { userId: demoUser.id, savedLookId: adminPublicLook.id },
+    ],
+  });
+
+  await prisma.lookComment.create({
+    data: {
+      userId: admin.id,
+      savedLookId: demoPublicLook.id,
+      body: "Love how the camel coat softens the tailoring!",
+    },
+  });
+
+  console.log("Wear, wishlist, calendar and feed demo data seeded.");
 
   // ---------------------------------------------------------
   // Reset demo catalog (idempotent)

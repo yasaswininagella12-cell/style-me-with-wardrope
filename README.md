@@ -1,8 +1,8 @@
 # Style Me With Wardrobe
 
 A full-stack fashion styling platform. Build your digital wardrobe, generate complete
-outfits ("Style My Outfit"), match jewelry, explore Trend Setter looks, and save your
-favorites.
+outfits ("Style My Outfit"), match jewelry, plan outfits on a calendar, track wear and
+garment care, manage a wishlist and budget, and share looks with the community.
 
 Built with **Next.js 16**, **React 19**, **Tailwind CSS v4**, **shadcn/ui**, **Prisma 7**
 (PostgreSQL), **Auth.js v5**, and **Cloudinary**.
@@ -20,6 +20,10 @@ Built with **Next.js 16**, **React 19**, **Tailwind CSS v4**, **shadcn/ui**, **P
   tone and gem recommendations.
 - **Trend Setter** — curated seasonal trends with item lists; heart any trend or look.
 - **Favorites & Saved Looks** — everything you hearted lives under one roof.
+- **Outfit Calendar** — schedule outfits by date, add notes, and mark plans as worn.
+- **Wear & Care** — log wears and garment care, track next care dates, and see cost per wear.
+- **Wishlist & Budget** — plan wardrobe gaps, track purchases, and set a monthly spending limit.
+- **Style Feed** — share public looks, follow stylists, like looks, and leave comments.
 - **Dashboard / Profile / Settings** — stats, recent items and your style profile.
 - **Admin console** — manage trends and the jewelry/accessory catalog (`/admin`).
 
@@ -120,6 +124,6 @@ src/
   auth.config.ts  # pages, session strategy, callbacks (guards /admin etc.)
   proxy.ts        # Next.js 16 middleware replacement
 prisma/
-  schema.prisma   # 14 models
+  schema.prisma   # 23 models
   seed.ts         # demo data
 ```

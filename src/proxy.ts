@@ -16,6 +16,11 @@ export default auth((req) => {
     nextUrl.pathname.startsWith("/looks") ||
     nextUrl.pathname.startsWith("/saved-looks") ||
     nextUrl.pathname.startsWith("/favorites") ||
+    nextUrl.pathname.startsWith("/calendar") ||
+    nextUrl.pathname.startsWith("/wear") ||
+    nextUrl.pathname.startsWith("/wishlist") ||
+    nextUrl.pathname.startsWith("/feed") ||
+    nextUrl.pathname.startsWith("/users") ||
     nextUrl.pathname.startsWith("/onboarding") ||
     nextUrl.pathname.startsWith("/profile") ||
     nextUrl.pathname.startsWith("/settings") ||
@@ -46,6 +51,11 @@ export const config = {
     "/looks/:path*",
     "/saved-looks/:path*",
     "/favorites/:path*",
+    "/calendar/:path*",
+    "/wear/:path*",
+    "/wishlist/:path*",
+    "/feed/:path*",
+    "/users/:path*",
     "/onboarding",
     "/profile/:path*",
     "/settings/:path*",

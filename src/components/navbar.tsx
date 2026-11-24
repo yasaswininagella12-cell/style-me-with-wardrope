@@ -11,9 +11,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
-import { SiteLogo, navLinks } from "@/components/site-logo";
+import { SiteLogo, featureLinks, navLinks } from "@/components/site-logo";
 import { SignOutButton } from "@/components/auth-buttons";
-import { LayoutDashboard, Settings, User as UserIcon } from "lucide-react";
+import { LayoutDashboard, Settings, Sparkles, User as UserIcon } from "lucide-react";
 
 export async function Navbar() {
   const session = await auth();
@@ -35,6 +35,29 @@ export async function Navbar() {
             </Link>
           ))}
         </nav>
+
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="hidden lg:inline-flex">
+                <Sparkles className="size-4 text-brand-gold" aria-hidden="true" />
+                More
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuLabel>Plan & share</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {featureLinks.map((link) => (
+                <DropdownMenuItem key={link.href} asChild>
+                  <Link href={link.href}>
+                    <link.icon className="size-4" aria-hidden="true" />
+                    {link.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         <div className="flex items-center gap-2">
           {user ? (

@@ -60,6 +60,7 @@ export default async function SavedLooksPage() {
             description: look.description,
             outfitId: look.outfitId,
             createdAt: look.createdAt,
+            isPublic: look.isPublic,
             outfit: {
               name: look.outfit.name,
               occasion: look.outfit.occasion,
