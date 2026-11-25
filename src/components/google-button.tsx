@@ -3,15 +3,22 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export function GoogleButton({ callbackUrl }: { callbackUrl?: string }) {
+export function GoogleButton({
+  callbackUrl,
+  className,
+}: {
+  callbackUrl?: string;
+  className?: string;
+}) {
   const [pending, setPending] = useState(false);
 
   return (
     <Button
       type="button"
       variant="outline"
-      className="w-full"
+      className={cn("w-full", className)}
       disabled={pending}
       onClick={() => {
         setPending(true);
